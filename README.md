@@ -33,6 +33,8 @@ In reality, your iPhone already has a high-quality microphone, and developers ha
 
 ## Features
 
+- **Supported Devices**: iPhone 11 and newer (requires iOS 16+)
+- **OS**: iOS 16.0 or later
 - **100% Free**: Operates entirely within Groq's generous perpetual free-tier limit (2,000 requests per day).
 - **Insanely Fast**: Whisper Large V3 transcribes your audio, and Llama 3.3 formats it, returning a complete note in under 3 seconds.
 - **Native iOS Integration**: Trigger it from your Lock Screen, Home Screen, Back Tap, or physical Action Button (iPhone 15 Pro / 16 / 16 Pro).
