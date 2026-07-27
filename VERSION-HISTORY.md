@@ -1,5 +1,8 @@
 # Version History
 
+## [1.2.1] - 2026-07-27
+- Rewritten Shortcut build steps as clear Key/Value tables showing exactly what goes in the left field (Key) and right field (Type + Value) for every header, body parameter, dictionary, and array item. Eliminates ambiguity for first-time Shortcut builders.
+
 ## [1.2.0] - 2026-07-27 (Phase 2)
 - Complete Back Tap setup guide with step-by-step instructions, troubleshooting, and sensitivity tips.
 - Complete Lock Screen and Home Screen widget setup guide with visual navigation paths.

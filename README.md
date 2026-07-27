@@ -60,41 +60,81 @@ Open the built-in **Shortcuts** app on your iPhone, click the **+** icon in the 
 #### 2. Send to Groq Whisper (Speech-to-Text)
 - Add the **Get Contents of URL** action.
 - Set the URL to: `https://api.groq.com/openai/v1/audio/transcriptions`
-- Tap **Show More** to configure:
-  - **Method**: `POST`
-  - **Headers**:
-    - `Authorization`: `Bearer YOUR_GROQ_API_KEY` (Paste your key here)
-  - **Request Body**: `Form`
-    - Add Key `file`: Choose type **File** and select the output of **Recorded Audio** from the magic variables list.
-    - Add Key `model`: Choose type **Text** and write `whisper-large-v3`.
-    - Add Key `response_format`: Choose type **Text** and write `json`.
+- Tap **Show More** to reveal all configuration options:
+
+**Method:**
+- Set the Method to `POST`.
+
+**Headers (what goes in each field):**
+
+| Key (left field) | Value (right field) |
+| :--- | :--- |
+| `Authorization` | `Bearer` + your Groq API key. Type it exactly like this: `Bearer gsk_yourkeyhere` |
+
+**Request Body:**
+- Change the Request Body type from `JSON` to `Form`.
+- Tap **Add new field** for each row below:
+
+| Key (left field) | Type (right field dropdown) | Value (right field) |
+| :--- | :--- | :--- |
+| `file` | `File` | Tap the field and select **Recorded Audio** from the magic variables menu. |
+| `model` | `Text` | Type: `whisper-large-v3` |
+| `response_format` | `Text` | Type: `json` |
 
 #### 3. Extract the Transcript
-- Add the **Get Value from Dictionary** action.
-- Set the key to `text` in `Contents of URL`. This isolates your raw transcript.
+- Add the **Get Dictionary Value** action. (In some iOS versions this is called **Get Value from Dictionary**.)
+- In the left **Key** field, type: `text`
+- In the right **Dictionary** field, select **Contents of URL** (the output from Step 2).
+- This isolates your raw transcript text.
 
 #### 4. Send to Llama-3 (Brain-Dump Formatter)
-- Add the **Get Contents of URL** action.
+- Add another **Get Contents of URL** action.
 - Set the URL to: `https://api.groq.com/openai/v1/chat/completions`
-- Tap **Show More** to configure:
-  - **Method**: `POST`
-  - **Headers**:
-    - `Authorization`: `Bearer YOUR_GROQ_API_KEY`
-    - `Content-Type`: `application/json`
-  - **Request Body**: `JSON`
-    - Add Key `model`: `llama-3.3-70b-specdec`
-    - Add Key `messages`: (Choose **Array** type)
-      - **Item 1 (System Prompt)**: Choose **Dictionary** type:
-        - Key `role`: `system`
-        - Key `content`: [Copy and paste the exact system prompt from prompt.txt in this repository]
-      - **Item 2 (User Input)**: Choose **Dictionary** type:
-        - Key `role`: `user`
-        - Key `content`: Select the transcript output from the previous dictionary step.
+- Tap **Show More** to reveal all configuration options:
+
+**Method:**
+- Set the Method to `POST`.
+
+**Headers (what goes in each field):**
+
+| Key (left field) | Value (right field) |
+| :--- | :--- |
+| `Authorization` | `Bearer` + your Groq API key (same as Step 2). |
+| `Content-Type` | Type `application/json` |
+
+**Request Body:**
+- Keep the Request Body type as `JSON`.
+- Tap **Add new field** for each top-level row below:
+
+| Key (left field) | Type (right field dropdown) | Value (right field) |
+| :--- | :--- | :--- |
+| `model` | `Text` | Type: `llama-3.3-70b-specdec` |
+| `messages` | `Array` | Tap the `[0 items]` text that appears next to it to open the array editor. |
+
+**Inside the `messages` array:**
+- Tap **Add new item** twice to create two items. Change each item's type from `Text` to `Dictionary`.
+- Tap into each dictionary (the `{0 items}` text) and add the following fields:
+
+**Dictionary Item 1 (System Prompt):**
+
+| Key (left field) | Type (right field) | Value (right field) |
+| :--- | :--- | :--- |
+| `role` | `Text` | Type: `system` |
+| `content` | `Text` | Copy and paste the entire content of [prompt.txt](prompt.txt) from this repo. |
+
+**Dictionary Item 2 (User Input):**
+
+| Key (left field) | Type (right field) | Value (right field) |
+| :--- | :--- | :--- |
+| `role` | `Text` | Type: `user` |
+| `content` | `Text` | Tap the field, then select the **Dictionary Value** output from Step 3 (the raw transcript). |
 
 #### 5. Parse and Save the Note
-- Add the **Get Value from Dictionary** action.
-- Set the key path to `choices.1.message.content` in `Contents of URL`.
-- Add the **Create Note** action (to save it directly inside Apple Notes) or **Create File** action (to save it inside your iCloud Obsidian folder as a `.md` file), and pass the output of this final dictionary step as the note content.
+- Add another **Get Dictionary Value** action.
+- In the left **Key** field, type: `choices.1.message.content`
+- In the right **Dictionary** field, select **Contents of URL** (the output from Step 4).
+- Add the **Create Note** action. Pass the output of this dictionary step as the note content.
+- If you prefer Obsidian: use **Save File** instead. Set the destination folder to your Obsidian vault in iCloud and append the file name with `.md`.
 
 ---
 
