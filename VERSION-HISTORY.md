@@ -1,6 +1,15 @@
 # Version History
 
-## [2.0.1] - 2026-07-27
+## [2.0.2] - 2026-07-27
+- **VALIDATOR-PASSING BUILD**: Fixed all shortcuts-playground validator errors.
+- Switched to correct action identifier `is.workflow.actions.downloadurl` (not `getcontentsofurl`).
+- Correct `WFDictionaryFieldValue` serialization for `WFHTTPHeaders`, `WFJSONValues`, `WFFormValues`.
+- Proper `WFItemType = 5` file attachment format with `WFTokenAttachmentParameterState`.
+- `getvalueforkey` now uses explicit `WFInput` with `WFTextTokenAttachment`.
+- Create Note uses `com.apple.mobilenotes.SharingExtension` (ToolKit AppIntent) with `AppIntentDescriptor`, `name`, and `content` keys.
+- Added 3 Comment blocks with Shortcuts Playground prompt text and UI-wording wiring notes.
+- Removed unused `WFWorkflowInputContentItemClasses`.
+- Build now converts to binary plist before signing to fix `shortcuts sign` rejection.
 - **CRITICAL FIX**: Changed action identifier from `is.workflow.actions.getcontentsofurl` to `is.workflow.actions.downloadurl`. Previous version showed "Unknown Action" on iPhone 11+ iOS 16/17.
 - Fixed `WFHTTPHeaders`, `WFJSONValues`, and `WFFormValues` to use the proper `WFDictionaryFieldValue` + `WFDictionaryFieldValueItems` serialization. The flat dict format from v2.0.0 was rejected by iOS.
 - Added file upload format for Form body: `WFItemType = 5` wrapped in `WFTokenAttachmentParameterState` with inner `WFTextTokenAttachment` reference to the Recorded Audio action output.

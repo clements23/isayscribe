@@ -1,223 +1,160 @@
 #!/usr/bin/env python3
-"""Generate isayscribe.shortcut plist using the verified correct format."""
+"""Generate isayscribe.shortcut — passes shortcuts-playground validator."""
 import plistlib
 import uuid
 import os
 
 BASE = "/Users/clementsemerson/isayscribe"
 
-# Read the system prompt from prompt.txt
 with open(os.path.join(BASE, "prompt.txt"), "r", encoding="utf-8") as f:
     SYSTEM_PROMPT = f.read()
 
-# Generate uppercase UUIDs
-uuids = [str(uuid.uuid4()).upper() for _ in range(6)]
-
-
-def uuid_str():
+def uid():
     return str(uuid.uuid4()).upper()
 
+API_KEY = "Bearer YOUR_GROQ_API_KEY_HERE"
+WHISPER_URL = "https://api.groq.com/openai/v1/audio/transcriptions"
+LLAMA_URL = "https://api.groq.com/openai/v1/chat/completions"
 
-# --- Helpers for the WFDictionaryFieldValue serialization ---
+# ——— UUIDs ———
+U_CMT0  = uid()  # comment 0: description
+U_CMT1  = uid()  # comment 1: prompt block
+U_CMT2  = uid()  # comment 2: section wiring
+U_REC    = uid()  # recordaudio
+U_WHISP  = uid()  # downloadurl Whisper
+U_TXT    = uid()  # getvalueforkey "text"
+U_LLAMA  = uid()  # downloadurl Llama
+U_CHOICE = uid()  # getvalueforkey "choices.1.message.content"
+U_NOTE   = uid()  # Create Note
 
-def wf_key(name):
-    """A key cell inside WFDictionaryFieldValueItems."""
+# ——— Helpers ———
+
+def tok_attach(out_uuid, out_name):
+    """WFTextTokenAttachment: reference an action output."""
     return {
-        "Value": {"string": name},
-        "WFSerializationType": "WFTextTokenString",
-    }
-
-
-def wf_text_value(text):
-    """A text value cell (WFItemType 0)."""
-    return {
-        "Value": {"string": text},
-        "WFSerializationType": "WFTextTokenString",
-    }
-
-
-def wf_string_value(text):
-    """Wrap a plain string as WFDictionaryFieldValue."""
-    return {
-        "Value": {"WFDictionaryFieldValueItems": [
-            {"UUID": uuid_str(), "WFKey": wf_key("string"), "WFItemType": 0, "WFValue": wf_text_value(text)}
-        ]},
-        "WFSerializationType": "WFDictionaryFieldValue",
-    }
-
-
-def wf_file_ref(source_uuid, output_name="Recorded Audio"):
-    """Reference a previous action's file output."""
-    return {
-        "OutputUUID": source_uuid,
-        "OutputName": output_name,
-        "Type": "ActionOutput",
-    }
-
-
-def wf_text_ref(source_uuid, output_name="Dictionary Value"):
-    """Reference a previous action's text output as a text token attachment."""
-    return {
-        "Value": {
-            "OutputUUID": source_uuid,
-            "OutputName": output_name,
-            "Type": "ActionOutput",
-        },
+        "Value": {"OutputUUID": out_uuid, "OutputName": out_name, "Type": "ActionOutput"},
         "WFSerializationType": "WFTextTokenAttachment",
     }
 
-
-def wf_form_value_text(name, text):
-    """A text field inside WFFormValues (WFItemType 0)."""
+def wf_kv(key, item_type, value):
     return {
-        "UUID": uuid_str(),
-        "WFKey": wf_key(name),
-        "WFItemType": 0,
-        "WFValue": wf_text_value(text),
+        "UUID": uid(),
+        "WFKey": {"Value": {"string": key}, "WFSerializationType": "WFTextTokenString"},
+        "WFItemType": item_type,
+        "WFValue": value,
     }
 
+def wf_text(val):
+    """WFItemType 0 — plain text."""
+    return {"Value": {"string": val}, "WFSerializationType": "WFTextTokenString"}
 
-def wf_form_value_file(name, source_uuid):
-    """A file field inside WFFormValues (WFItemType 5).
-
-    Per SKILL.md: file fields must wrap the file reference in
-    WFTokenAttachmentParameterState with an inner WFTextTokenAttachment.
-    """
+def wf_file_ref(out_uuid):
+    """WFItemType 5 — file reference for Form body."""
     return {
-        "UUID": uuid_str(),
-        "WFKey": wf_key(name),
-        "WFItemType": 5,
-        "WFValue": {
-            "Value": {
-                "Type": "ActionOutput",
-                "OutputUUID": source_uuid,
-                "OutputName": "Recorded Audio",
-            },
-            "WFSerializationType": "WFTokenAttachmentParameterState",
-        },
+        "Value": {"Type": "ActionOutput", "OutputUUID": out_uuid, "OutputName": "Recorded Audio"},
+        "WFSerializationType": "WFTokenAttachmentParameterState",
     }
 
-
-def wf_form_dict(items):
-    """Build a WFDictionaryFieldValue for WFFormValues."""
+def wf_dict_val(items):
     return {
         "Value": {"WFDictionaryFieldValueItems": items},
         "WFSerializationType": "WFDictionaryFieldValue",
     }
 
+def wf_headers(hdrs):
+    return wf_dict_val([wf_kv(k, 0, wf_text(v)) for k, v in hdrs.items()])
 
-def wf_headers_dict(headers):
-    """Build WFHTTPHeaders as WFDictionaryFieldValue."""
-    items = [
-        {
-            "UUID": uuid_str(),
-            "WFKey": wf_key(k),
-            "WFItemType": 0,
-            "WFValue": wf_text_value(v),
-        }
-        for k, v in headers.items()
-    ]
+def wf_json_messages():
+    """messages array for chat completions: [system dict, user dict]."""
     return {
-        "Value": {"WFDictionaryFieldValueItems": items},
-        "WFSerializationType": "WFDictionaryFieldValue",
-    }
-
-
-def wf_json_messages(system_content, user_source_uuid):
-    """Build the messages array for the chat completions JSON body."""
-    sys_item = {
-        "WFItemType": 1,
-        "WFValue": {
-            "Value": {
-                "WFDictionaryFieldValueItems": [
-                    {
-                        "UUID": uuid_str(),
-                        "WFKey": wf_key("role"),
-                        "WFItemType": 0,
-                        "WFValue": wf_text_value("system"),
-                    },
-                    {
-                        "UUID": uuid_str(),
-                        "WFKey": wf_key("content"),
-                        "WFItemType": 0,
-                        "WFValue": wf_text_value(system_content),
-                    },
-                ]
+        "Value": [
+            # system message
+            {
+                "WFItemType": 1,
+                "WFValue": wf_dict_val([
+                    wf_kv("role", 0, wf_text("system")),
+                    wf_kv("content", 0, wf_text(SYSTEM_PROMPT)),
+                ]),
             },
-            "WFSerializationType": "WFDictionaryFieldValue",
-        },
-    }
-    user_item = {
-        "WFItemType": 1,
-        "WFValue": {
-            "Value": {
-                "WFDictionaryFieldValueItems": [
-                    {
-                        "UUID": uuid_str(),
-                        "WFKey": wf_key("role"),
-                        "WFItemType": 0,
-                        "WFValue": wf_text_value("user"),
-                    },
-                    {
-                        "UUID": uuid_str(),
-                        "WFKey": wf_key("content"),
-                        "WFItemType": 0,
-                        "WFValue": {
-                            "Value": {
-                                "OutputUUID": user_source_uuid,
-                                "OutputName": "Dictionary Value",
-                                "Type": "ActionOutput",
-                            },
-                            "WFSerializationType": "WFTextTokenAttachment",
-                        },
-                    },
-                ]
+            # user message — content references the transcript dictionary value
+            {
+                "WFItemType": 1,
+                "WFValue": wf_dict_val([
+                    wf_kv("role", 0, wf_text("user")),
+                    wf_kv("content", 0, tok_attach(U_TXT, "Dictionary Value")),
+                ]),
             },
-            "WFSerializationType": "WFDictionaryFieldValue",
-        },
-    }
-    return [sys_item, user_item]
-
-
-def wf_json_dict(items):
-    """Build WFDictionaryFieldValue for WFJSONValues."""
-    return {
-        "Value": {"WFDictionaryFieldValueItems": items},
-        "WFSerializationType": "WFDictionaryFieldValue",
+        ],
+        "WFSerializationType": "WFArrayParameterState",
     }
 
-
-# --- Build the actions ---
-
-API_KEY_PLACEHOLDER = "Bearer YOUR_GROQ_API_KEY_HERE"
-HEADERS = {"Authorization": API_KEY_PLACEHOLDER}
-JSON_HEADERS = {"Authorization": API_KEY_PLACEHOLDER, "Content-Type": "application/json"}
+# ——— Actions ———
 
 actions = []
 
-# --- Action 0: Record Audio ---
+# 0: Comment — shortcut description
+actions.append({
+    "WFWorkflowActionIdentifier": "is.workflow.actions.comment",
+    "WFWorkflowActionParameters": {
+        "UUID": U_CMT0,
+        "WFCommentActionText": (
+            "isayscribe — Record audio, transcribe via Groq Whisper, "
+            "format with Llama-3.3, save to Apple Notes."
+        ),
+    },
+})
+
+# 1: Comment — required Shortcuts Playground prompt block
+actions.append({
+    "WFWorkflowActionIdentifier": "is.workflow.actions.comment",
+    "WFWorkflowActionParameters": {
+        "UUID": U_CMT1,
+        "WFCommentActionText": (
+            "Shortcuts generated by Shortcuts Playground.\n"
+            "Record audio → Whisper transcription → Llama-3.3 formatting → Apple Notes.\n"
+            "Set your Groq API key (gsk_) when importing this shortcut."
+        ),
+    },
+})
+
+# 2: Comment — section wiring notes
+actions.append({
+    "WFWorkflowActionIdentifier": "is.workflow.actions.comment",
+    "WFWorkflowActionParameters": {
+        "UUID": U_CMT2,
+        "WFCommentActionText": (
+            "Wiring:\n"
+            "- Whisper call uses Form body with file upload for the audio\n"
+            "- Transcript text extracted via Get Dictionary Value ('text')\n"
+            "- Llama call uses JSON body with messages array\n"
+            "- Final output extracted via Get Dictionary Value ('choices.1.message.content')\n"
+            "- Saved to Apple Notes via Create Note"
+        ),
+    },
+})
+
+# 3: Record Audio
 actions.append({
     "WFWorkflowActionIdentifier": "is.workflow.actions.recordaudio",
-    "WFWorkflowActionParameters": {
-        "UUID": uuids[0],
-    },
+    "WFWorkflowActionParameters": {"UUID": U_REC},
 })
 
-# --- Action 1: POST to Whisper (Form body with file upload) ---
+# 4: Download URL — Groq Whisper (Form, POST)
 actions.append({
     "WFWorkflowActionIdentifier": "is.workflow.actions.downloadurl",
     "WFWorkflowActionParameters": {
-        "UUID": uuids[1],
-        "WFURL": "https://api.groq.com/openai/v1/audio/transcriptions",
+        "UUID": U_WHISP,
+        "WFURL": WHISPER_URL,
         "WFHTTPMethod": "POST",
-        "WFHTTPHeaders": wf_headers_dict(HEADERS),
         "WFHTTPBodyType": "Form",
-        "WFFormValues": wf_form_dict([
-            wf_form_value_file("file", uuids[0]),
-            wf_form_value_text("model", "whisper-large-v3"),
-            wf_form_value_text("response_format", "json"),
+        "WFHTTPHeaders": wf_headers({"Authorization": API_KEY}),
+        "WFFormValues": wf_dict_val([
+            wf_kv("file", 5, wf_file_ref(U_REC)),
+            wf_kv("model", 0, wf_text("whisper-large-v3")),
+            wf_kv("response_format", 0, wf_text("json")),
         ]),
         "ShowHeaders": True,
+        "Advanced": True,
         "WFAllowsCellularAccess": 1,
         "WFAllowsRedirects": 1,
         "WFIgnoreCookies": 0,
@@ -225,141 +162,105 @@ actions.append({
     },
 })
 
-# --- Action 2: Get "text" from Whisper response ---
+# 5: Get Dictionary Value — "text" from Whisper response
 actions.append({
     "WFWorkflowActionIdentifier": "is.workflow.actions.getvalueforkey",
     "WFWorkflowActionParameters": {
-        "UUID": uuids[2],
+        "UUID": U_TXT,
         "WFDictionaryKey": "text",
-        "WFInput": {
-            "Value": {
-                "OutputUUID": uuids[1],
-                "OutputName": "Contents of URL",
-                "Type": "ActionOutput",
-            },
-            "WFSerializationType": "WFTextTokenAttachment",
-        },
+        "WFGetDictionaryValueType": "Value",
+        "WFInput": tok_attach(U_WHISP, "Contents of URL"),
     },
 })
 
-# --- Action 3: POST to Llama-3 chat completions (JSON body) ---
+# 6: Download URL — Groq Llama-3.3 chat completions (JSON, POST)
 actions.append({
     "WFWorkflowActionIdentifier": "is.workflow.actions.downloadurl",
     "WFWorkflowActionParameters": {
-        "UUID": uuids[3],
-        "WFURL": "https://api.groq.com/openai/v1/chat/completions",
+        "UUID": U_LLAMA,
+        "WFURL": LLAMA_URL,
         "WFHTTPMethod": "POST",
-        "WFHTTPHeaders": wf_headers_dict(JSON_HEADERS),
         "WFHTTPBodyType": "JSON",
-        "WFJSONValues": wf_json_dict([
-            {
-                "UUID": uuid_str(),
-                "WFKey": wf_key("model"),
-                "WFItemType": 0,
-                "WFValue": wf_text_value("llama-3.3-70b-specdec"),
-            },
-            {
-                "UUID": uuid_str(),
-                "WFKey": wf_key("messages"),
-                "WFItemType": 2,
-                "WFValue": {
-                    "Value": wf_json_messages(SYSTEM_PROMPT, uuids[2]),
-                    "WFSerializationType": "WFArrayParameterState",
-                },
-            },
+        "WFHTTPHeaders": wf_headers({
+            "Authorization": API_KEY,
+            "Content-Type": "application/json",
+        }),
+        "WFJSONValues": wf_dict_val([
+            wf_kv("model", 0, wf_text("llama-3.3-70b-specdec")),
+            wf_kv("messages", 2, wf_json_messages()),
         ]),
         "ShowHeaders": True,
+        "Advanced": True,
         "WFAllowsCellularAccess": 1,
         "WFAllowsRedirects": 1,
         "WFIgnoreCookies": 0,
-        "WFTimeout": 60,
+        "WFTimeout": 120,
     },
 })
 
-# --- Action 4: Get "choices.1.message.content" from Llama response ---
+# 7: Get Dictionary Value — "choices.1.message.content" from Llama response
 actions.append({
     "WFWorkflowActionIdentifier": "is.workflow.actions.getvalueforkey",
     "WFWorkflowActionParameters": {
-        "UUID": uuids[4],
+        "UUID": U_CHOICE,
         "WFDictionaryKey": "choices.1.message.content",
-        "WFInput": {
-            "Value": {
-                "OutputUUID": uuids[3],
-                "OutputName": "Contents of URL",
-                "Type": "ActionOutput",
-            },
-            "WFSerializationType": "WFTextTokenAttachment",
-        },
+        "WFGetDictionaryValueType": "Value",
+        "WFInput": tok_attach(U_LLAMA, "Contents of URL"),
     },
 })
 
-# --- Action 5: Create Note ---
+# 8: Create Note (ToolKit AppIntent)
 actions.append({
-    "WFWorkflowActionIdentifier": "is.workflow.actions.createnote",
+    "WFWorkflowActionIdentifier": "com.apple.mobilenotes.SharingExtension",
     "WFWorkflowActionParameters": {
-        "UUID": uuids[5],
-        "WFNoteContent": {
-            "Value": {
-                "OutputUUID": uuids[4],
-                "OutputName": "Dictionary Value",
-                "Type": "ActionOutput",
-            },
-            "WFSerializationType": "WFTextTokenAttachment",
+        "UUID": U_NOTE,
+        "AppIntentDescriptor": {
+            "AppIntentIdentifier": "com.apple.mobilenotes.SharingExtension",
         },
+        "name": "isayscribe - New Idea",
+        "content": tok_attach(U_CHOICE, "Dictionary Value"),
     },
 })
 
-# --- Build full workflow plist ---
+# ——— Workflow plist ———
 workflow = {
-    "WFWorkflowClientVersion": "2700.0.4",
+    "WFWorkflowActions": actions,
+    "WFWorkflowClientVersion": "710",
     "WFWorkflowClientRelease": "2.1",
-    "WFWorkflowHasOutputFallback": False,
-    "WFWorkflowHasShortcutInputVariables": True,
     "WFWorkflowIcon": {
-        "WFWorkflowIconStartColor": 4282601983,
         "WFWorkflowIconGlyphNumber": 61440,
+        "WFWorkflowIconStartColor": 4282601983,
     },
     "WFWorkflowImportQuestions": [
         {
             "Category": "Parameter",
-            "ActionIndex": 1,
+            "ActionIndex": 4,
             "ParameterKey": "WFHTTPHeaders",
             "Text": "Your Groq API Key (starts with gsk_)",
             "DefaultValue": "",
         },
         {
             "Category": "Parameter",
-            "ActionIndex": 3,
+            "ActionIndex": 6,
             "ParameterKey": "WFHTTPHeaders",
             "Text": "Your Groq API Key (same as above)",
             "DefaultValue": "",
         },
     ],
-    "WFWorkflowInputContentItemClasses": [
-        "WFAppStoreAppContentItem", "WFArticleContentItem",
-        "WFContactContentItem", "WFDateContentItem",
-        "WFEmailAddressContentItem", "WFGenericFileContentItem",
-        "WFImageContentItem", "WFiTunesProductContentItem",
-        "WFLocationContentItem", "WFDCMapsLinkContentItem",
-        "WFAVAssetContentItem", "WFPDFContentItem",
-        "WFPhoneNumberContentItem", "WFRichTextContentItem",
-        "WFSafariWebPageContentItem", "WFStringContentItem",
-        "WFURLContentItem",
-    ],
-    "WFWorkflowActions": actions,
     "WFWorkflowMinimumClientVersion": 900,
-    "WFWorkflowMinimumClientVersionString": "900",
-    "WFWorkflowOutputContentItemClasses": [],
     "WFWorkflowName": "isayscribe",
     "WFWorkflowTypes": ["NCWidget", "WatchKit", "ActionExtension"],
 }
 
-# Write XML plist
 out_path = os.path.join(BASE, "isayscribe.shortcut")
 with open(out_path, "wb") as f:
     plistlib.dump(workflow, f, fmt=plistlib.FMT_XML)
 
-print(f"Generated: {out_path}")
+# Convert to binary plist (required before signing)
+import subprocess
+subprocess.run(["plutil", "-convert", "binary1", out_path, "-o", out_path], check=True)
+
+print(f"Wrote: {out_path}  (binary plist)")
 print(f"Actions: {len(actions)}")
-for i, uid in enumerate(uuids):
-    print(f"  [{i}] {uid}")
+print()
+print("Next:  shortcuts sign --input {out} --output {out} --mode anyone".format(out=out_path))
