@@ -50,91 +50,20 @@ In reality, your iPhone already has a high-quality microphone, and developers ha
 2. Go to **API Keys** in the sidebar.
 3. Click **Create API Key**, name it `isayscribe`, and copy the generated key (it starts with `gsk_`).
 
-### Step 2: Build the iOS Shortcut
-Open the built-in **Shortcuts** app on your iPhone, click the **+** icon in the top-right to create a new shortcut, name it **"isayscribe"**, and assemble these exact actions:
+### Step 2: Install the Shortcut
 
-#### 1. Record the Audio
-- Add the **Record Audio** action.
-- Set configuration to: Record `Audio` with `Microphone`. Stop Recording: `On Tap` (or `On Short Tap`).
+**One tap. Done.**
 
-#### 2. Send to Groq Whisper (Speech-to-Text)
-- Add the **Get Contents of URL** action.
-- Set the URL to: `https://api.groq.com/openai/v1/audio/transcriptions`
-- Tap **Show More** to reveal all configuration options:
+1. On your iPhone, open this page in Safari.
+2. Tap the download link below.
+3. When prompted, enter your Groq API key (starts with `gsk_`).
+4. Tap **Add Shortcut**.
 
-**Method:**
-- Set the Method to `POST`.
+👉 **[Download isayscribe.shortcut](isayscribe.shortcut)**
 
-**Headers (what goes in each field):**
+That's it. The shortcut is now in your Shortcuts app, fully configured.
 
-| Key (left field) | Value (right field) |
-| :--- | :--- |
-| `Authorization` | `Bearer` + your Groq API key. Type it exactly like this: `Bearer gsk_yourkeyhere` |
-
-**Request Body:**
-- Change the Request Body type from `JSON` to `Form`.
-- Tap **Add new field** three times to create three rows. For each row:
-
-| Key (top label on the row) | Type (dropdown below Key) | Value (field to the right of the type dropdown) |
-| :--- | :--- | :--- |
-| `file` | Change to `File` | Tap the value field and select **Recorded Audio** from the magic variables menu. |
-| `model` | Leave as `Text` (default) | Type: `whisper-large-v3` |
-| `response_format` | Leave as `Text` (default) | Type: `json` |
-
-#### 3. Extract the Transcript
-- Add the **Get Dictionary Value** action. (In some iOS versions this is called **Get Value from Dictionary**.)
-- In the left **Key** field, type: `text`
-- In the right **Dictionary** field, select **Contents of URL** (the output from Step 2).
-- This isolates your raw transcript text.
-
-#### 4. Send to Llama-3 (Brain-Dump Formatter)
-- Add another **Get Contents of URL** action.
-- Set the URL to: `https://api.groq.com/openai/v1/chat/completions`
-- Tap **Show More** to reveal all configuration options:
-
-**Method:**
-- Set the Method to `POST`.
-
-**Headers (what goes in each field):**
-
-| Key (left field) | Value (right field) |
-| :--- | :--- |
-| `Authorization` | `Bearer` + your Groq API key (same as Step 2). |
-| `Content-Type` | Type `application/json` |
-
-**Request Body:**
-- Keep the Request Body type as `JSON`.
-- Tap **Add new field** for each top-level row below:
-
-| Key (left field) | Type (right field dropdown) | Value (right field) |
-| :--- | :--- | :--- |
-| `model` | `Text` | Type: `llama-3.3-70b-specdec` |
-| `messages` | `Array` | Tap the `[0 items]` text that appears next to it to open the array editor. |
-
-**Inside the `messages` array:**
-- Tap **Add new item** twice to create two items. Change each item's type from `Text` to `Dictionary`.
-- Tap into each dictionary (the `{0 items}` text) and add the following fields:
-
-**Dictionary Item 1 (System Prompt):**
-
-| Key (left field) | Type (right field) | Value (right field) |
-| :--- | :--- | :--- |
-| `role` | `Text` | Type: `system` |
-| `content` | `Text` | Copy and paste the entire content of [prompt.txt](prompt.txt) from this repo. |
-
-**Dictionary Item 2 (User Input):**
-
-| Key (left field) | Type (right field) | Value (right field) |
-| :--- | :--- | :--- |
-| `role` | `Text` | Type: `user` |
-| `content` | `Text` | Tap the field, then select the **Dictionary Value** output from Step 3 (the raw transcript). |
-
-#### 5. Parse and Save the Note
-- Add another **Get Dictionary Value** action.
-- In the left **Key** field, type: `choices.1.message.content`
-- In the right **Dictionary** field, select **Contents of URL** (the output from Step 4).
-- Add the **Create Note** action. Pass the output of this dictionary step as the note content.
-- If you prefer Obsidian: use **Save File** instead. Set the destination folder to your Obsidian vault in iCloud and append the file name with `.md`.
+> **What's inside:** Record Audio → Groq Whisper transcription → Llama-3.3 structured formatting → Apple Notes. Open it in the Shortcuts app anytime to inspect or modify.
 
 ---
 

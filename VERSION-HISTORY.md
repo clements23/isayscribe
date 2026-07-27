@@ -1,5 +1,10 @@
 # Version History
 
+## [2.0.0] - 2026-07-27
+- Complete rewrite: replaced 5-step manual Shortcut build with a signed `.shortcut` file. One download, one tap, enter API key, done.
+- Added `build_shortcut.py` for regenerating the shortcut file from source components.
+- Import questions prompt for API key on first open -- no manual editing needed.
+
 ## [1.2.1] - 2026-07-27
 - Rewritten Shortcut build steps as clear Key/Value tables showing exactly what goes in the left field (Key) and right field (Type + Value) for every header, body parameter, dictionary, and array item. Eliminates ambiguity for first-time Shortcut builders.
 
