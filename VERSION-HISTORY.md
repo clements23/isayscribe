@@ -1,5 +1,14 @@
 # Version History
 
+## [2.0.1] - 2026-07-27
+- **CRITICAL FIX**: Changed action identifier from `is.workflow.actions.getcontentsofurl` to `is.workflow.actions.downloadurl`. Previous version showed "Unknown Action" on iPhone 11+ iOS 16/17.
+- Fixed `WFHTTPHeaders`, `WFJSONValues`, and `WFFormValues` to use the proper `WFDictionaryFieldValue` + `WFDictionaryFieldValueItems` serialization. The flat dict format from v2.0.0 was rejected by iOS.
+- Added file upload format for Form body: `WFItemType = 5` wrapped in `WFTokenAttachmentParameterState` with inner `WFTextTokenAttachment` reference to the Recorded Audio action output.
+- Switched dot-notation key path from `WFGetValueFromDictionaryKeyPath` boolean flag to `WFDictionaryKey` string with dot notation (e.g. `choices.1.message.content`).
+- Added required network settings: `WFAllowsCellularAccess`, `WFAllowsRedirects`, `WFIgnoreCookies`, `WFTimeout`.
+- UUIDs now generated in uppercase as required by Shortcuts validators.
+- Bumped `WFWorkflowClientVersion` to `2700.0.4`.
+
 ## [2.0.0] - 2026-07-27
 - Complete rewrite: replaced 5-step manual Shortcut build with a signed `.shortcut` file. One download, one tap, enter API key, done.
 - Added `build_shortcut.py` for regenerating the shortcut file from source components.
