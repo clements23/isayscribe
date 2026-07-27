@@ -73,13 +73,13 @@ Open the built-in **Shortcuts** app on your iPhone, click the **+** icon in the 
 
 **Request Body:**
 - Change the Request Body type from `JSON` to `Form`.
-- Tap **Add new field** for each row below:
+- Tap **Add new field** three times to create three rows. For each row:
 
-| Key (left field) | Type (right field dropdown) | Value (right field) |
+| Key (top label on the row) | Type (dropdown below Key) | Value (field to the right of the type dropdown) |
 | :--- | :--- | :--- |
-| `file` | `File` | Tap the field and select **Recorded Audio** from the magic variables menu. |
-| `model` | `Text` | Type: `whisper-large-v3` |
-| `response_format` | `Text` | Type: `json` |
+| `file` | Change to `File` | Tap the value field and select **Recorded Audio** from the magic variables menu. |
+| `model` | Leave as `Text` (default) | Type: `whisper-large-v3` |
+| `response_format` | Leave as `Text` (default) | Type: `json` |
 
 #### 3. Extract the Transcript
 - Add the **Get Dictionary Value** action. (In some iOS versions this is called **Get Value from Dictionary**.)
