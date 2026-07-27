@@ -1,5 +1,10 @@
 # Version History
 
+## [3.0.0] - 2026-07-27
+- **Major redesign**: Replaced Groq Whisper API with native iOS on-device transcription (`com.apple.ShortcutsActions.TranscribeAudioAction`). This eliminates the unreliable multipart Form file upload and works offline.
+- Only Llama-3.3 formatting uses the Groq API (JSON POST, no file upload needed).
+- Reduced from 9 actions to 8 actions. Import question now only asks for API key once.
+
 ## [2.0.3] - 2026-07-27
 - **RUNTIME FIX**: Replaced invalid model ID `llama-3.3-70b-specdec` with the correct Groq model ID `llama-3.3-70b-versatile`. The previous ID did not exist on Groq, causing the API to return an error response with no `choices` key, which made `Get Dictionary Value` fail at runtime with "no value was found for dictionary key 'choices'".
 
