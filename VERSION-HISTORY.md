@@ -1,5 +1,10 @@
 # Version History
 
+## [1.2.0] - 2026-07-27 (Phase 2)
+- Complete Back Tap setup guide with step-by-step instructions, troubleshooting, and sensitivity tips.
+- Complete Lock Screen and Home Screen widget setup guide with visual navigation paths.
+- Rewritten Trigger Options section as a full tutorial covering all three trigger methods for iPhone 11+.
+
 ## [1.1.0] - 2026-07-27 (Phase 2)
 - Added official Prompt Presets directory (`prompts/`) with specialized templates for Meeting Minutes (`meeting-minutes.txt`) and Technical Brainstorms (`code-brainstorm.txt`).
 - Expanded customization documentation.

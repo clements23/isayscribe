@@ -100,10 +100,87 @@ Open the built-in **Shortcuts** app on your iPhone, click the **+** icon in the 
 
 ## Trigger Options
 
-To get the real "Plaud/Pocket AI" immediate hardware feel, configure how you trigger the shortcut:
-- **Action Button (iPhone 15 Pro / 16 / 16 Pro)**: Go to **Settings > Action Button**, select **Shortcut**, and choose `isayscribe`. Press and hold your physical side button to instantly start recording your thoughts.
-- **Back Tap**: Go to **Settings > Accessibility > Touch > Back Tap**. Assign `isayscribe` to Double Tap or Triple Tap.
-- **Home Screen / Lock Screen Widget**: Add a native Shortcuts widget directly to your Home Screen or Lock Screen for one-tap capture.
+The whole point of isayscribe is speed. Your ideas arrive in seconds. Your capture method should too.
+
+Below are three trigger methods, ordered by how fast they get you from thought to recording. iPhone 11-14 users should use Method 2 (Back Tap) or Method 3 (Widget). iPhone 15 Pro and 16 Pro users have all three.
+
+---
+
+### Method 1: Action Button (iPhone 15 Pro / 16 / 16 Pro Only)
+
+This is the fastest possible trigger. You press a physical button and start talking. No screen interaction required.
+
+1. Open **Settings**.
+2. Scroll down and tap **Action Button**.
+3. Swipe left until you see the **Shortcuts** option (the icon looks like two colored squares).
+4. Tap the shortcut selector below it and choose **isayscribe** from the list.
+5. Done. Now press and hold the Action Button on the left side of your iPhone to instantly start recording.
+
+---
+
+### Method 2: Back Tap (iPhone 11 and Newer)
+
+Back Tap turns the back of your iPhone into a hidden button. Double-tap or triple-tap the back glass to launch isayscribe from anywhere - even when your phone is locked.
+
+This is the best trigger method for iPhone 11-14 users who do not have an Action Button.
+
+#### Step-by-Step Setup:
+
+1. Open **Settings**.
+2. Tap **Accessibility**.
+3. Under the "Physical and Motor" section, tap **Touch**.
+4. Scroll all the way to the bottom and tap **Back Tap**.
+5. Choose either **Double Tap** or **Triple Tap**.
+   - **Double Tap** is faster but may trigger accidentally when you set your phone down.
+   - **Triple Tap** is more deliberate. Recommended if you carry your phone in your hand a lot.
+6. Scroll through the list of available actions and find **isayscribe** under the Shortcuts section.
+7. Tap it to assign it.
+8. Exit Settings. Your trigger is now live.
+
+#### How to Use It:
+- With your iPhone unlocked or locked, firmly tap the back glass twice (or three times) with your finger.
+- isayscribe will launch immediately and start recording.
+- Tap the screen when you are done speaking. Your note will appear in Apple Notes or Obsidian within seconds.
+
+#### Troubleshooting Back Tap:
+- If nothing happens when you tap, try tapping harder. Thick cases reduce sensitivity.
+- If it triggers too often, switch from Double Tap to Triple Tap.
+- If it never works, go back to Settings > Accessibility > Touch > Back Tap and make sure isayscribe is still assigned.
+
+---
+
+### Method 3: Home Screen & Lock Screen Widget (iPhone 11 and Newer)
+
+If Back Tap feels unreliable with your phone case, use a widget instead. One visible tap on your screen is all it takes.
+
+#### Add to Home Screen:
+1. Go to your Home Screen.
+2. Press and hold on any empty space until the apps start wiggling.
+3. Tap the **+** button in the top-left corner (or top-right, depending on your iOS version).
+4. Search for **Shortcuts** in the widget gallery.
+5. Choose the **single shortcut** widget size (the smallest square).
+6. Tap **Add Widget**.
+7. While still in wiggle mode, tap the widget to configure it.
+8. Select **isayscribe** from the shortcut list.
+9. Tap outside the widget to exit configuration.
+10. Drag the widget wherever you want it on your Home Screen.
+11. Tap **Done** in the top-right corner.
+
+#### Add to Lock Screen (iOS 16+):
+1. Wake your iPhone but do not unlock it. Stay on the Lock Screen.
+2. Press and hold on the Lock Screen until the customization menu appears.
+3. Tap **Customize** at the bottom.
+4. Tap the **Lock Screen** preview.
+5. Tap the area **below the clock** where widgets live (this is the widget strip).
+6. In the widget picker that slides up, scroll down and find **Shortcuts**.
+7. Tap it, then tap the single shortcut widget.
+8. Tap the widget to select it, then choose **isayscribe** from the list.
+9. Tap **Done** in the top-right corner, then tap the Lock Screen preview to confirm.
+10. Your Lock Screen now has a one-tap isayscribe button visible every time you pick up your phone.
+
+#### How to Use It:
+- From the Lock Screen, tap the isayscribe widget. Your phone will unlock, launch the shortcut, and start recording immediately.
+- From the Home Screen, same thing - one tap and you are recording.
 
 ---
 
