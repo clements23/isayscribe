@@ -1,5 +1,8 @@
 # Version History
 
+## [2.0.3] - 2026-07-27
+- **RUNTIME FIX**: Replaced invalid model ID `llama-3.3-70b-specdec` with the correct Groq model ID `llama-3.3-70b-versatile`. The previous ID did not exist on Groq, causing the API to return an error response with no `choices` key, which made `Get Dictionary Value` fail at runtime with "no value was found for dictionary key 'choices'".
+
 ## [2.0.2] - 2026-07-27
 - **VALIDATOR-PASSING BUILD**: Fixed all shortcuts-playground validator errors.
 - Switched to correct action identifier `is.workflow.actions.downloadurl` (not `getcontentsofurl`).

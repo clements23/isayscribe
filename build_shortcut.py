@@ -186,7 +186,7 @@ actions.append({
             "Content-Type": "application/json",
         }),
         "WFJSONValues": wf_dict_val([
-            wf_kv("model", 0, wf_text("llama-3.3-70b-specdec")),
+            wf_kv("model", 0, wf_text("llama-3.3-70b-versatile")),
             wf_kv("messages", 2, wf_json_messages()),
         ]),
         "ShowHeaders": True,
