@@ -91,7 +91,7 @@ actions = [
                             "WFItemType": 1,
                             "WFValue": wf_dict_val([
                                 wf_kv("role", 0, wf_text("user")),
-                                wf_kv("content", 0, tok_attach(U_DICT, "Dictated Text")),
+                                wf_kv("content", 0, tok_attach(U_DICT, "Text")),
                             ]),
                         },
                     ],
