@@ -1,5 +1,10 @@
 # Version History
 
+## [3.1.0] - 2026-07-27
+- **Reliability fix**: Replaced Record Audio + Transcribe Audio with native iOS Dictate Text (`is.workflow.actions.dictatetext`). Uses the same dictation engine as the keyboard microphone, guaranteed to work on every iPhone 11+.
+- Only Llama-3.3 uses the Groq API (JSON POST, no file uploads).
+- Down to 6 actions: Comment×2 → Dictate Text → Llama → Get Dict Key → Create Note.
+
 ## [3.0.0] - 2026-07-27
 - **Major redesign**: Replaced Groq Whisper API with native iOS on-device transcription (`com.apple.ShortcutsActions.TranscribeAudioAction`). This eliminates the unreliable multipart Form file upload and works offline.
 - Only Llama-3.3 formatting uses the Groq API (JSON POST, no file upload needed).
